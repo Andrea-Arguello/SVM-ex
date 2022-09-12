@@ -29,6 +29,40 @@ abline(beta0 / beta[2], -beta[1] / beta[2])
 abline((beta0 - 1) / beta[2], -beta[1] / beta[2], lty = 2)
 abline((beta0 + 1) / beta[2], -beta[1] / beta[2], lty = 2)
 
+# Cambiando el valor de c
+svmfit = svm(
+  y ~ .,
+  data = dat,
+  kernel = "linear",
+  cost = 5, # cost = c
+  scale = FALSE)
+print(svmfit)
+
+beta = drop(t(svmfit$coefs)%*%svmfit$SV)
+beta0 = svmfit$rho
+
+plot(x, col = y + 3, pch = 19)
+points(x[svmfit$index,], pch = 5, cex = 2)
+abline(beta0 / beta[2], -beta[1] / beta[2])
+abline((beta0 - 1) / beta[2], -beta[1] / beta[2], lty = 2)
+abline((beta0 + 1) / beta[2], -beta[1] / beta[2], lty = 2)
+
+svmfit = svm(
+  y ~ .,
+  data = dat,
+  kernel = "linear",
+  cost = 30, # cost = c
+  scale = FALSE)
+print(svmfit)
+
+beta = drop(t(svmfit$coefs)%*%svmfit$SV)
+beta0 = svmfit$rho
+
+plot(x, col = y + 3, pch = 19)
+points(x[svmfit$index,], pch = 5, cex = 2)
+abline(beta0 / beta[2], -beta[1] / beta[2])
+abline((beta0 - 1) / beta[2], -beta[1] / beta[2], lty = 2)
+abline((beta0 + 1) / beta[2], -beta[1] / beta[2], lty = 2)
 
 # Otro ejemplo lineal, pero con datos sobrelapados
 set.seed(101011)
