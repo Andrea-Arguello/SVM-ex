@@ -1,3 +1,4 @@
+library(e1071)
 # Polinomial
 # Código para generar el area o "grid" de cada clase
 grids = function(x, n = 100) {
@@ -21,7 +22,7 @@ svmfit = svm(
   y ~ .,
   data = dat,
   kernel = "linear", #Intentemos usar un kernel lineal
-  cost = 10, # cost = c
+  cost = 25, # cost = c
   scale = FALSE)
 xgrid = grids(x)
 ygrid = predict(svmfit, xgrid)
@@ -36,7 +37,7 @@ svmfit = svm(
   data = dat,
   kernel = "polynomial", #comparando con un kernel polinomial grado 2
   degree = 2,
-  cost = 10, # cost = c
+  cost = 25, # cost = c
   scale = FALSE)
 
 xgrid = grids(x)
@@ -49,7 +50,7 @@ svmfit = svm(
   y ~ .,
   data = dat,
   kernel = "radial", #comparando con un kernel polinomial grado 2
-  cost = 10, # cost = c
+  cost = 25, # cost = c
   scale = FALSE)
 
 xgrid = grids(x)
@@ -75,7 +76,7 @@ svmfit = svm(
   y ~ .,
   data = dat,
   kernel = "radial", #comparando con un kernel polinomial grado 2
-  cost = 20, # cost = c
+  cost = 50, # cost = c
   scale = FALSE)
 
 xgrid = grids(x)
@@ -128,61 +129,89 @@ points(x, col = y + 3, pch = 19)
 points(x[svmfit$index,], pch = 5, cex = 2)
 
 # Ejemplo 2
-# Nuestro working directory será donde esté el archivo, para tener acceso al .rda
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-load(file = "ESL.mixture.rda")
-names(ESL.mixture)
-rm(x,y)
-attach(ESL.mixture)
-# Veamos los datos
-plot(x, col= y + 1)
+set.seed(434)
+x <- matrix(rnorm(400), 200, 2)
+y <- as.numeric(c(xor(x[,1] > 0, x[,2] > 0.55)))
+plot(x, col = y + 3, pch = 19)
+dat = data.frame(x, y=as.factor(y))
 
-# Notemos que hay mucho más overlap de datos
-dat = data.frame(x, y = factor(y))
-
-# Probemos primero con un polinomio de grado 5
-svmfit = svm(y ~ .,
-             data = dat,
-             scale = FALSE,
-             kernel = "polynomial",
-             degree = 5,
-             cost = 10)
-print(svmfit)
+svmfit = svm(
+  y ~ .,
+  data = dat,
+  kernel = "polynomial", #como no podemos trazar una linea, usamos un kernel polinomial
+  degree = 4, # probemos con uno de grado 4 primero
+  cost = 10, # cost = c
+  scale = FALSE)
+print(svmfit) 
 xgrid = grids(x)
 ygrid = predict(svmfit, xgrid)
-plot(xgrid, col = as.numeric(ygrid), pch = 20, cex = .2)
-points(x, col = y + 1, pch = 19)
+plot(xgrid, col = c("green","blue")[as.numeric(ygrid)], pch = 20, cex = .2)
+points(x, col = y + 3, pch = 19)
 
-svmfit = svm(y ~ .,
-          data = dat,
-          scale = FALSE,
-          kernel = "radial",
-          cost = 10)
-print(svmfit)
+
+svmfit = svm(
+  y ~ .,
+  data = dat,
+  kernel = "polynomial", 
+  degree = 5,
+  cost = 10, # cost = c
+  scale = FALSE)
+print(svmfit) 
 xgrid = grids(x)
 ygrid = predict(svmfit, xgrid)
-plot(xgrid, col = as.numeric(ygrid), pch = 20, cex = .2)
-points(x, col = y + 1, pch = 19)
+plot(xgrid, col = c("green","blue")[as.numeric(ygrid)], pch = 20, cex = .2)
+points(x, col = y + 3, pch = 19)
 
-# Veamos qué pasa si aumentamos y disminuimos el cost
-svmfit = svm(y ~ .,
-             data = dat,
-             scale = FALSE,
-             kernel = "radial",
-             cost = 20)
-print(svmfit)
+svmfit = svm(
+  y ~ .,
+  data = dat,
+  kernel = "polynomial", 
+  degree = 6,
+  cost = 10, # cost = c
+  scale = FALSE)
+print(svmfit) 
 xgrid = grids(x)
 ygrid = predict(svmfit, xgrid)
-plot(xgrid, col = as.numeric(ygrid), pch = 20, cex = .2,)
-points(x, col = y + 1, pch = 19)
+plot(xgrid, col = c("green","blue")[as.numeric(ygrid)], pch = 20, cex = .2)
+points(x, col = y + 3, pch = 19)
 
-svmfit = svm(y ~ .,
-             data = dat,
-             scale = FALSE,
-             kernel = "radial",
-             cost = 5)
-print(svmfit)
+# Gaussiano
+svmfit = svm(
+  y ~ .,
+  data = dat,
+  kernel = "radial", 
+  cost = 10, # cost = c
+  scale = FALSE)
 xgrid = grids(x)
 ygrid = predict(svmfit, xgrid)
-plot(xgrid, col = as.numeric(ygrid), pch = 20, cex = .2, alpha=0.5)
-points(x, col = y + 1, pch = 19)
+plot(xgrid, col = c("green","blue")[as.numeric(ygrid)], pch = 20, cex = .2)
+points(x, col = y + 3, pch = 19)
+
+# Ahora, juguemos con gamma. por default, es 1/(tamaño de datos)
+svmfit = svm(
+  y ~ .,
+  data = dat,
+  kernel = "radial", 
+  cost = 10, # cost = c
+  scale = FALSE,
+  gamma = 1,
+  )
+print(svmfit) # indica num. de support vectors utilizados, ademas del kernel y tipo
+xgrid = grids(x)
+ygrid = predict(svmfit, xgrid)
+plot(xgrid, col = c("green","blue")[as.numeric(ygrid)], pch = 20, cex = .2)
+points(x, col = y + 3, pch = 19)
+
+svmfit = svm(
+  y ~ .,
+  data = dat,
+  kernel = "radial", 
+  cost = 10, # cost = c
+  scale = FALSE,
+  gamma = 50,
+)
+print(svmfit) # indica num. de support vectors utilizados, ademas del kernel y tipo
+xgrid = grids(x)
+ygrid = predict(svmfit, xgrid)
+plot(xgrid, col = c("green","blue")[as.numeric(ygrid)], pch = 20, cex = .2)
+points(x, col = y + 3, pch = 19)
